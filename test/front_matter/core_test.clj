@@ -24,21 +24,21 @@
                "lines")))))
 
   (testing "without front matter"
-    (is (= {:front-matter nil :content "fancy content"}
+    (is (= {:content "fancy content"}
            (parse-front-matter "fancy content"))))
 
   (testing "with unclosed front matter"
-    (is (= {:front-matter nil :content "---\nNot front matter"}
+    (is (= {:content "---\nNot front matter"}
            (parse-front-matter "---\nNot front matter"))))
 
   (testing "with triple dash, but not on the first line"
-    (is (= {:front-matter nil :content "a: 1\n---\nb: 2\n---\nMore"}
+    (is (= {:content "a: 1\n---\nb: 2\n---\nMore"}
            (parse-front-matter "a: 1\n---\nb: 2\n---\nMore"))))
 
   (testing "with empty front matter"
-    (is (= {:front-matter nil :content "More"}
+    (is (= {:content "More"}
            (parse-front-matter "---\n---\nMore")))
-    (is (= {:front-matter nil :content "More"}
+    (is (= {:content "More"}
            (parse-front-matter "---\n\n\n---\nMore"))))
 
   (testing "with multiple triple dashes in the file"
@@ -59,4 +59,34 @@
                "---\r"
                "a: 1\r"
                "---"
-               "fancy content"))))))
+               "fancy content")))))
+
+  (testing "with only front matter"
+    (is (= {:content "---\na: 1\n---"}
+           (parse-front-matter
+             (long-str
+               "---"
+               "a: 1"
+               "---"))))
+    (is (= {:front-matter {:a 1} :content ""}
+           (parse-front-matter
+             (long-str
+               "---"
+               "a: 1"
+               "---"
+               ""))))
+    (is (= {:front-matter {:a 1} :content " "}
+           (parse-front-matter
+             (long-str
+               "---"
+               "a: 1"
+               "---"
+               " "))))
+    (is (= {:front-matter {:a 1} :content "\n"}
+           (parse-front-matter
+             (long-str
+               "---"
+               "a: 1"
+               "---"
+               ""
+               ""))))))

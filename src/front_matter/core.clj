@@ -1,7 +1,7 @@
 (ns front-matter.core
   (:require [clj-yaml.core :as yaml]))
 
-(def front-matter-regex
+(def ^:private front-matter-regex
   (re-pattern
     (clojure.string/join
       [; set to "dot all" mode, so `.` will include newlines
@@ -12,15 +12,11 @@
        ; This captures the content
        "(.*)"])))
 
-(defn- split-front-matter [text]
-  (let [[_ front-matter content]
-        (re-matches front-matter-regex text)]
-    {:front-matter front-matter :content content}))
-
 (defn- yamlize [text]
   (when text (yaml/parse-string text)))
 
 (defn parse-front-matter [text]
-  (update (split-front-matter text)
-          :front-matter
-          yamlize))
+  (let [[_ front-matter-string content] (re-matches front-matter-regex text)
+        front-matter (yamlize front-matter-string)]
+    (cond-> {:content content}
+            front-matter (assoc :front-matter front-matter))))
